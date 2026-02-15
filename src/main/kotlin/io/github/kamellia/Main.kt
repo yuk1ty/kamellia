@@ -1,0 +1,65 @@
+package io.github.kamellia
+
+import io.github.kamellia.core.Response
+import io.github.kamellia.core.text
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class User(val id: String, val name: String)
+
+@Serializable
+data class SearchResult(val query: String, val results: List<String>)
+
+@Serializable
+data class PostResponse(val userId: String?, val postId: String?, val title: String)
+
+@Serializable
+data class CreateUserResponse(val status: String, val data: String)
+
+suspend fun main() {
+    val app = Kamellia()
+
+    // Simple GET endpoint
+    app.get("/") { request ->
+        Response.ok("Hello, Kamellia!")
+    }
+
+    // Path parameters
+    app.get("/users/{id}") { request ->
+        val userId = request.pathParams["id"]
+        Response.json(User(id = userId ?: "unknown", name = "John Doe"))
+    }
+
+    // Multiple path parameters
+    app.get("/users/{userId}/posts/{postId}") { request ->
+        Response.json(
+            PostResponse(
+                userId = request.pathParams["userId"],
+                postId = request.pathParams["postId"],
+                title = "Sample Post",
+            ),
+        )
+    }
+
+    // POST endpoint
+    app.post("/users") { request ->
+        val body = request.text()
+        println("Received: $body")
+        Response.json(
+            CreateUserResponse(
+                status = "created",
+                data = body,
+            ),
+        )
+    }
+
+    // Query parameters
+    app.get("/search") { request ->
+        val query = request.queryParams["q"]?.firstOrNull() ?: ""
+        val result = SearchResult(query = query, results = emptyList())
+        Response.json(result)
+    }
+
+    println("Starting Kamellia server on port 3000...")
+    app.start(3000)
+}

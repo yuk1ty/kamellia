@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>InvalidPackageDeclaration:Main.kt$package billone.purchasing.dummyHighlightAnalysisEngine</ID>
+    <ID>MagicNumber:Main.kt$5</ID>
+    <ID>MaxLineLength:Main.kt$// TIP Press &lt;shortcut actionId="Debug"/&gt; to start debugging your code. We have set one &lt;icon src="AllIcons.Debugger.Db_set_breakpoint"/&gt; breakpoint</ID>
+  </CurrentIssues>
+</SmellBaseline>
