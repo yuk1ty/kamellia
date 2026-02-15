@@ -82,7 +82,7 @@ app.get("/") { req ->
     Response.ok("Hello, Kamellia!")
 }
 
-app.get("/users/:id") { req ->
+app.get("/users/{id}") { req ->
     val userId = req.pathParams.int("id")
         ?: return@get Response.badRequest("Invalid user ID")
     Response.json(mapOf("userId" to userId))
@@ -160,13 +160,14 @@ interface RouteMatcher {
 }
 
 data class RouteMatch(
-    val pathParams: Map<String, String>,
+    val pathParams: PathParams,
     val handler: Handler
 )
 
 class PathPatternMatcher(private val pattern: String) : RouteMatcher {
-    // "/users/:id/posts/:postId" のようなパターンをパース
-    // 正規表現または独自のパーサーで実装
+    // "/users/{id}/posts/{postId}" のようなパターンをパース
+    // 正規表現で PathParams を返す
+    fun match(path: String): PathParams?
 }
 ```
 
@@ -178,8 +179,10 @@ class PathPatternMatcher(private val pattern: String) : RouteMatcher {
 ##### パスパラメータの型安全アクセス
 
 ```kotlin
-class PathParams internal constructor(
-    private val params: Map<String, String>
+@JvmInline
+value class PathParams internal constructor(
+    @PublishedApi
+    internal val params: Map<String, String>
 ) {
     // 基本的な型変換メソッド
     fun int(key: String): Int? = params[key]?.toIntOrNull()
@@ -209,8 +212,10 @@ class PathParams internal constructor(
 ##### クエリパラメータの型安全アクセス
 
 ```kotlin
-class QueryParams internal constructor(
-    private val params: Map<String, List<String>>
+@JvmInline
+value class QueryParams internal constructor(
+    @PublishedApi
+    internal val params: Map<String, List<String>>
 ) {
     // 単一値の取得（最初の値を返す）
     fun int(key: String): Int? = params[key]?.firstOrNull()?.toIntOrNull()
@@ -260,14 +265,14 @@ data class Request(
 
 ```kotlin
 // パスパラメータの取得（型名で明示的）
-app.get("/users/:id") { req ->
+app.get("/users/{id}") { req ->
     val userId = req.pathParams.int("id")
         ?: return@get Response.badRequest("Invalid user ID")
     Response.json(getUser(userId))
 }
 
 // inline reified 版（型推論が効く）
-app.get("/posts/:postId") { req ->
+app.get("/posts/{postId}") { req ->
     val postId: Long = req.pathParams.get("postId")
         ?: return@get Response.badRequest("Invalid post ID")
     Response.json(getPost(postId))
@@ -291,7 +296,7 @@ app.get("/filter") { req ->
 }
 
 // より複雑な例
-app.get("/articles/:articleId/comments/:commentId") { req ->
+app.get("/articles/{articleId}/comments/{commentId}") { req ->
     val articleId: Long = req.pathParams.get("articleId")
         ?: return@get Response.badRequest("Invalid article ID")
     val commentId: Int = req.pathParams.get("commentId")
@@ -322,11 +327,12 @@ app.get("/articles/:articleId/comments/:commentId") { req ->
 リクエストスコープのコンテキスト:
 
 ```kotlin
-class Context {
-    private val state = mutableMapOf<String, Any>()
-
+@JvmInline
+value class Context(private val state: MutableMap<String, Any> = mutableMapOf()) {
     fun <T> get(key: String): T?
     fun <T> set(key: String, value: T)
+    fun remove(key: String)
+    fun clear()
 
     // ミドルウェア間でのデータ共有に使用
 }
@@ -352,9 +358,12 @@ app.get("/profile") { req ->
 ```kotlin
 sealed interface Body {
     data object Empty : Body
-    data class Text(val content: String) : Body
-    data class Binary(val bytes: ByteArray) : Body
-    data class Stream(val channel: ReceiveChannel<ByteArray>) : Body
+
+    @JvmInline
+    value class Text(val content: String) : Body
+
+    @JvmInline
+    value class Binary(val bytes: ByteArray) : Body
 }
 
 // Request拡張関数（kotlinx.serialization使用）

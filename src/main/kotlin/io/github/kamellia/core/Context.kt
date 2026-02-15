@@ -1,7 +1,7 @@
 package io.github.kamellia.core
 
-class Context {
-    private val state = mutableMapOf<String, Any>()
+@JvmInline
+value class Context(private val state: MutableMap<String, Any> = mutableMapOf()) {
 
     @Suppress("UNCHECKED_CAST")
     fun <T> get(key: String): T? {
