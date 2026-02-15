@@ -32,8 +32,8 @@ data class Request(
     val method: HttpMethod,
     val path: String,
     val headers: Headers,
-    val queryParams: QueryParams,
-    val pathParams: PathParams,
+    val queryParams: QueryParams, // 型安全なアクセスを提供するクラス
+    val pathParams: PathParams,   // 型安全なアクセスを提供するクラス
     val body: Body,
     val context: Context
 )
@@ -47,6 +47,7 @@ data class Response(
         fun ok(body: String = ""): Response
         fun json(data: Any): Response
         fun notFound(): Response
+        fun badRequest(message: String = "Bad Request"): Response
         fun internalServerError(message: String): Response
     }
 }
@@ -82,7 +83,8 @@ app.get("/") { req ->
 }
 
 app.get("/users/:id") { req ->
-    val userId = req.pathParams["id"]
+    val userId = req.pathParams.int("id")
+        ?: return@get Response.badRequest("Invalid user ID")
     Response.json(mapOf("userId" to userId))
 }
 
@@ -167,6 +169,153 @@ class PathPatternMatcher(private val pattern: String) : RouteMatcher {
     // 正規表現または独自のパーサーで実装
 }
 ```
+
+#### 型安全なパラメータアクセス
+
+パスパラメータとクエリパラメータは、型安全性を最優先に設計します。
+内部的には `Map<String, String>` を保持しますが、アクセスは専用のクラスを通じて行います。
+
+##### パスパラメータの型安全アクセス
+
+```kotlin
+class PathParams internal constructor(
+    private val params: Map<String, String>
+) {
+    // 基本的な型変換メソッド
+    fun int(key: String): Int? = params[key]?.toIntOrNull()
+    fun long(key: String): Long? = params[key]?.toLongOrNull()
+    fun string(key: String): String? = params[key]
+    fun boolean(key: String): Boolean? = params[key]?.toBooleanStrictOrNull()
+    fun double(key: String): Double? = params[key]?.toDoubleOrNull()
+
+    // inline reified を使った型推論版
+    inline fun <reified T> get(key: String): T? {
+        val value = params[key] ?: return null
+        return when (T::class) {
+            Int::class -> value.toIntOrNull() as? T
+            Long::class -> value.toLongOrNull() as? T
+            String::class -> value as? T
+            Boolean::class -> value.toBooleanStrictOrNull() as? T
+            Double::class -> value.toDoubleOrNull() as? T
+            else -> null
+        }
+    }
+
+    // デバッグ用
+    override fun toString(): String = params.toString()
+}
+```
+
+##### クエリパラメータの型安全アクセス
+
+```kotlin
+class QueryParams internal constructor(
+    private val params: Map<String, List<String>>
+) {
+    // 単一値の取得（最初の値を返す）
+    fun int(key: String): Int? = params[key]?.firstOrNull()?.toIntOrNull()
+    fun long(key: String): Long? = params[key]?.firstOrNull()?.toLongOrNull()
+    fun string(key: String): String? = params[key]?.firstOrNull()
+    fun boolean(key: String): Boolean? = params[key]?.firstOrNull()?.toBooleanStrictOrNull()
+    fun double(key: String): Double? = params[key]?.firstOrNull()?.toDoubleOrNull()
+
+    // 複数値の取得
+    fun list(key: String): List<String> = params[key] ?: emptyList()
+    fun intList(key: String): List<Int> = params[key]?.mapNotNull { it.toIntOrNull() } ?: emptyList()
+    fun longList(key: String): List<Long> = params[key]?.mapNotNull { it.toLongOrNull() } ?: emptyList()
+
+    // inline reified を使った型推論版（単一値）
+    inline fun <reified T> get(key: String): T? {
+        val value = params[key]?.firstOrNull() ?: return null
+        return when (T::class) {
+            Int::class -> value.toIntOrNull() as? T
+            Long::class -> value.toLongOrNull() as? T
+            String::class -> value as? T
+            Boolean::class -> value.toBooleanStrictOrNull() as? T
+            Double::class -> value.toDoubleOrNull() as? T
+            else -> null
+        }
+    }
+
+    // デバッグ用
+    override fun toString(): String = params.toString()
+}
+```
+
+##### Request型の定義
+
+```kotlin
+data class Request(
+    val method: HttpMethod,
+    val path: String,
+    val headers: Headers,
+    val queryParams: QueryParams,
+    val pathParams: PathParams,
+    val body: Body,
+    val context: Context,
+)
+```
+
+##### 使用例
+
+```kotlin
+// パスパラメータの取得（型名で明示的）
+app.get("/users/:id") { req ->
+    val userId = req.pathParams.int("id")
+        ?: return@get Response.badRequest("Invalid user ID")
+    Response.json(getUser(userId))
+}
+
+// inline reified 版（型推論が効く）
+app.get("/posts/:postId") { req ->
+    val postId: Long = req.pathParams.get("postId")
+        ?: return@get Response.badRequest("Invalid post ID")
+    Response.json(getPost(postId))
+}
+
+// クエリパラメータ（単一値）
+app.get("/search") { req ->
+    val page = req.queryParams.int("page") ?: 1
+    val limit = req.queryParams.int("limit") ?: 10
+    val sortBy = req.queryParams.string("sort") ?: "created_at"
+
+    Response.json(search(page, limit, sortBy))
+}
+
+// クエリパラメータ（複数値）
+app.get("/filter") { req ->
+    val tags = req.queryParams.list("tags") // ["kotlin", "server"]
+    val ids = req.queryParams.intList("ids") // [1, 2, 3]
+
+    Response.json(filterItems(tags, ids))
+}
+
+// より複雑な例
+app.get("/articles/:articleId/comments/:commentId") { req ->
+    val articleId: Long = req.pathParams.get("articleId")
+        ?: return@get Response.badRequest("Invalid article ID")
+    val commentId: Int = req.pathParams.get("commentId")
+        ?: return@get Response.badRequest("Invalid comment ID")
+
+    val includeReplies = req.queryParams.boolean("replies") ?: false
+
+    Response.json(getComment(articleId, commentId, includeReplies))
+}
+```
+
+##### 設計のメリット
+
+1. **コンパイル時の型安全性**: メソッド名で型が明確になる（`int()`, `string()` など）
+2. **型推論の活用**: `get<T>()` を使えば、変数の型アノテーションから自動推論される
+3. **null安全**: すべてのメソッドが nullable を返すため、パースエラーを明示的に処理できる
+4. **複数値のサポート**: クエリパラメータの複数値を型安全に扱える
+5. **拡張性**: 新しい型のサポートを簡単に追加できる
+6. **デバッグしやすい**: `toString()` で内部状態を確認できる
+
+##### 内部実装の隠蔽
+
+`PathParams` と `QueryParams` のコンストラクタを `internal` にすることで、
+フレームワーク内部でのみインスタンス化でき、ユーザーは型安全なAPIだけを使用することになります。
 
 ### 5. Context とステート管理
 

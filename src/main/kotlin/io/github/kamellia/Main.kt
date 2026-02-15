@@ -26,7 +26,7 @@ suspend fun main() {
 
     // Path parameters
     app.get("/users/{id}") { request ->
-        val userId = request.pathParams["id"]
+        val userId = request.pathParams.string("id")
         Response.json(User(id = userId ?: "unknown", name = "John Doe"))
     }
 
@@ -34,8 +34,8 @@ suspend fun main() {
     app.get("/users/{userId}/posts/{postId}") { request ->
         Response.json(
             PostResponse(
-                userId = request.pathParams["userId"],
-                postId = request.pathParams["postId"],
+                userId = request.pathParams.string("userId"),
+                postId = request.pathParams.string("postId"),
                 title = "Sample Post",
             ),
         )
@@ -55,7 +55,7 @@ suspend fun main() {
 
     // Query parameters
     app.get("/search") { request ->
-        val query = request.queryParams["q"]?.firstOrNull() ?: ""
+        val query = request.queryParams.string("q") ?: ""
         val result = SearchResult(query = query, results = emptyList())
         Response.json(result)
     }

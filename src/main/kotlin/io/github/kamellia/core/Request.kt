@@ -1,8 +1,6 @@
 package io.github.kamellia.core
 
 typealias Headers = Map<String, String>
-typealias QueryParams = Map<String, List<String>>
-typealias PathParams = Map<String, String>
 
 data class Request(
     val method: HttpMethod,

@@ -1,5 +1,7 @@
 package io.github.kamellia.routing
 
+import io.github.kamellia.core.PathParams
+
 class PathPatternMatcher(pattern: String) {
     private val paramNames = mutableListOf<String>()
     private val regex: Regex
@@ -21,7 +23,7 @@ class PathPatternMatcher(pattern: String) {
         regex = Regex("^$regexPattern\$")
     }
 
-    fun match(path: String): Map<String, String>? {
+    fun match(path: String): PathParams? {
         val matchResult = regex.matchEntire(path) ?: return null
 
         val params = mutableMapOf<String, String>()
@@ -31,7 +33,7 @@ class PathPatternMatcher(pattern: String) {
             }
         }
 
-        return params
+        return PathParams.of(params)
     }
 
     fun matches(path: String): Boolean {

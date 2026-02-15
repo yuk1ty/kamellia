@@ -64,8 +64,8 @@ class RequestConverterTest {
         val request = RequestConverter.convert(nettyRequest)
 
         assertEquals("/search", request.path)
-        assertEquals(listOf("kotlin"), request.queryParams["q"])
-        assertEquals(listOf("1"), request.queryParams["page"])
+        assertEquals(listOf("kotlin"), request.queryParams.list("q"))
+        assertEquals(listOf("1"), request.queryParams.list("page"))
     }
 
     @Test
@@ -99,7 +99,7 @@ class RequestConverterTest {
 
         val request = RequestConverter.convert(nettyRequest)
 
-        assertEquals(listOf("kotlin", "java", "rust"), request.queryParams["tag"])
+        assertEquals(listOf("kotlin", "java", "rust"), request.queryParams.list("tag"))
     }
 
     @Test

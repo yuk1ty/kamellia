@@ -12,8 +12,8 @@ class RequestTest {
                 method = HttpMethod.GET,
                 path = "/",
                 headers = emptyMap(),
-                queryParams = emptyMap(),
-                pathParams = emptyMap(),
+                queryParams = QueryParams.empty(),
+                pathParams = PathParams.empty(),
                 body = Body.Text("Hello, World!"),
                 context = Context(),
             )
@@ -28,8 +28,8 @@ class RequestTest {
                 method = HttpMethod.GET,
                 path = "/",
                 headers = emptyMap(),
-                queryParams = emptyMap(),
-                pathParams = emptyMap(),
+                queryParams = QueryParams.empty(),
+                pathParams = PathParams.empty(),
                 body = Body.Binary("Hello".toByteArray()),
                 context = Context(),
             )
@@ -44,8 +44,8 @@ class RequestTest {
                 method = HttpMethod.GET,
                 path = "/",
                 headers = emptyMap(),
-                queryParams = emptyMap(),
-                pathParams = emptyMap(),
+                queryParams = QueryParams.empty(),
+                pathParams = PathParams.empty(),
                 body = Body.Empty,
                 context = Context(),
             )
@@ -60,8 +60,8 @@ class RequestTest {
                 method = HttpMethod.POST,
                 path = "/users",
                 headers = mapOf("Content-Type" to "application/json"),
-                queryParams = mapOf("filter" to listOf("active")),
-                pathParams = mapOf("id" to "123"),
+                queryParams = QueryParams.of(mapOf("filter" to listOf("active"))),
+                pathParams = PathParams.of(mapOf("id" to "123")),
                 body = Body.Text("{}"),
                 context = Context(),
             )
@@ -69,7 +69,7 @@ class RequestTest {
         assertEquals(HttpMethod.POST, request.method)
         assertEquals("/users", request.path)
         assertEquals("application/json", request.headers["Content-Type"])
-        assertEquals(listOf("active"), request.queryParams["filter"])
-        assertEquals("123", request.pathParams["id"])
+        assertEquals(listOf("active"), request.queryParams.list("filter"))
+        assertEquals("123", request.pathParams.string("id"))
     }
 }

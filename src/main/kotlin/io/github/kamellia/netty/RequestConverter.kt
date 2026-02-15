@@ -43,8 +43,8 @@ object RequestConverter {
             method = HttpMethod.fromString(nettyRequest.method().name()),
             path = decoder.path(),
             headers = headers,
-            queryParams = queryParams,
-            pathParams = emptyMap(), // Will be populated by router
+            queryParams = QueryParams.of(queryParams),
+            pathParams = PathParams.empty(), // Will be populated by router
             body = body,
             context = Context(),
         )

@@ -29,15 +29,15 @@ class RouterTest {
                 method = HttpMethod.GET,
                 path = "/users",
                 headers = emptyMap(),
-                queryParams = emptyMap(),
-                pathParams = emptyMap(),
+                queryParams = QueryParams.empty(),
+                pathParams = PathParams.empty(),
                 body = Body.Empty,
                 context = Context(),
             )
 
         val match = router.match(request)
         assertNotNull(match)
-        assertEquals(0, match.pathParams.size)
+        assertEquals(PathParams.empty(), match.pathParams)
     }
 
     @Test
@@ -50,16 +50,15 @@ class RouterTest {
                 method = HttpMethod.GET,
                 path = "/users/123",
                 headers = emptyMap(),
-                queryParams = emptyMap(),
-                pathParams = emptyMap(),
+                queryParams = QueryParams.empty(),
+                pathParams = PathParams.empty(),
                 body = Body.Empty,
                 context = Context(),
             )
 
         val match = router.match(request)
         assertNotNull(match)
-        assertEquals(1, match.pathParams.size)
-        assertEquals("123", match.pathParams["id"])
+        assertEquals("123", match.pathParams.string("id"))
     }
 
     @Test
@@ -72,8 +71,8 @@ class RouterTest {
                 method = HttpMethod.POST,
                 path = "/users",
                 headers = emptyMap(),
-                queryParams = emptyMap(),
-                pathParams = emptyMap(),
+                queryParams = QueryParams.empty(),
+                pathParams = PathParams.empty(),
                 body = Body.Empty,
                 context = Context(),
             )
@@ -92,8 +91,8 @@ class RouterTest {
                 method = HttpMethod.GET,
                 path = "/posts",
                 headers = emptyMap(),
-                queryParams = emptyMap(),
-                pathParams = emptyMap(),
+                queryParams = QueryParams.empty(),
+                pathParams = PathParams.empty(),
                 body = Body.Empty,
                 context = Context(),
             )
@@ -114,8 +113,8 @@ class RouterTest {
                 method = HttpMethod.GET,
                 path = "/users",
                 headers = emptyMap(),
-                queryParams = emptyMap(),
-                pathParams = emptyMap(),
+                queryParams = QueryParams.empty(),
+                pathParams = PathParams.empty(),
                 body = Body.Empty,
                 context = Context(),
             )
@@ -126,8 +125,8 @@ class RouterTest {
                 method = HttpMethod.GET,
                 path = "/posts",
                 headers = emptyMap(),
-                queryParams = emptyMap(),
-                pathParams = emptyMap(),
+                queryParams = QueryParams.empty(),
+                pathParams = PathParams.empty(),
                 body = Body.Empty,
                 context = Context(),
             )
@@ -138,8 +137,8 @@ class RouterTest {
                 method = HttpMethod.POST,
                 path = "/users",
                 headers = emptyMap(),
-                queryParams = emptyMap(),
-                pathParams = emptyMap(),
+                queryParams = QueryParams.empty(),
+                pathParams = PathParams.empty(),
                 body = Body.Empty,
                 context = Context(),
             )
@@ -157,8 +156,8 @@ class RouterTest {
                 method = HttpMethod.GET,
                 path = "/users/123",
                 headers = emptyMap(),
-                queryParams = emptyMap(),
-                pathParams = emptyMap(),
+                queryParams = QueryParams.empty(),
+                pathParams = PathParams.empty(),
                 body = Body.Empty,
                 context = Context(),
             )

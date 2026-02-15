@@ -1,5 +1,6 @@
 package io.github.kamellia.routing
 
+import io.github.kamellia.core.PathParams
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -11,7 +12,7 @@ class PathPatternMatcherTest {
         val matcher = PathPatternMatcher("/users")
         val result = matcher.match("/users")
         assertNotNull(result)
-        assertEquals(0, result.size)
+        assertEquals(PathParams.empty(), result)
     }
 
     @Test
@@ -26,8 +27,7 @@ class PathPatternMatcherTest {
         val matcher = PathPatternMatcher("/users/{id}")
         val result = matcher.match("/users/123")
         assertNotNull(result)
-        assertEquals(1, result.size)
-        assertEquals("123", result["id"])
+        assertEquals("123", result.string("id"))
     }
 
     @Test
@@ -35,9 +35,8 @@ class PathPatternMatcherTest {
         val matcher = PathPatternMatcher("/users/{userId}/posts/{postId}")
         val result = matcher.match("/users/456/posts/789")
         assertNotNull(result)
-        assertEquals(2, result.size)
-        assertEquals("456", result["userId"])
-        assertEquals("789", result["postId"])
+        assertEquals("456", result.string("userId"))
+        assertEquals("789", result.string("postId"))
     }
 
     @Test
@@ -45,7 +44,7 @@ class PathPatternMatcherTest {
         val matcher = PathPatternMatcher("/users/{id}")
         val result = matcher.match("/users/abc-123_xyz")
         assertNotNull(result)
-        assertEquals("abc-123_xyz", result["id"])
+        assertEquals("abc-123_xyz", result.string("id"))
     }
 
     @Test
@@ -67,7 +66,7 @@ class PathPatternMatcherTest {
         val matcher = PathPatternMatcher("/")
         val result = matcher.match("/")
         assertNotNull(result)
-        assertEquals(0, result.size)
+        assertEquals(PathParams.empty(), result)
     }
 
     @Test
@@ -75,5 +74,15 @@ class PathPatternMatcherTest {
         val matcher = PathPatternMatcher("/users/{id}")
         assertEquals(true, matcher.matches("/users/123"))
         assertEquals(false, matcher.matches("/posts/123"))
+    }
+
+    @Test
+    fun testTypeSafeParameterAccess() {
+        val matcher = PathPatternMatcher("/users/{id}/age/{age}")
+        val result = matcher.match("/users/123/age/25")
+        assertNotNull(result)
+        assertEquals(123, result.int("id"))
+        assertEquals(25, result.int("age"))
+        assertNull(result.int("nonexistent"))
     }
 }
