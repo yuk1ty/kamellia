@@ -24,7 +24,7 @@ class PathPatternMatcherTest {
 
     @Test
     fun testSingleParameter() {
-        val matcher = PathPatternMatcher("/users/{id}")
+        val matcher = PathPatternMatcher("/users/:id")
         val result = matcher.match("/users/123")
         assertNotNull(result)
         assertEquals("123", result.string("id"))
@@ -32,7 +32,7 @@ class PathPatternMatcherTest {
 
     @Test
     fun testMultipleParameters() {
-        val matcher = PathPatternMatcher("/users/{userId}/posts/{postId}")
+        val matcher = PathPatternMatcher("/users/:userId/posts/:postId")
         val result = matcher.match("/users/456/posts/789")
         assertNotNull(result)
         assertEquals("456", result.string("userId"))
@@ -41,7 +41,7 @@ class PathPatternMatcherTest {
 
     @Test
     fun testParameterWithSpecialCharacters() {
-        val matcher = PathPatternMatcher("/users/{id}")
+        val matcher = PathPatternMatcher("/users/:id")
         val result = matcher.match("/users/abc-123_xyz")
         assertNotNull(result)
         assertEquals("abc-123_xyz", result.string("id"))
@@ -49,14 +49,14 @@ class PathPatternMatcherTest {
 
     @Test
     fun testNoMatchWithExtraSegments() {
-        val matcher = PathPatternMatcher("/users/{id}")
+        val matcher = PathPatternMatcher("/users/:id")
         val result = matcher.match("/users/123/posts")
         assertNull(result)
     }
 
     @Test
     fun testNoMatchWithMissingSegments() {
-        val matcher = PathPatternMatcher("/users/{id}/posts")
+        val matcher = PathPatternMatcher("/users/:id/posts")
         val result = matcher.match("/users/123")
         assertNull(result)
     }
@@ -71,14 +71,14 @@ class PathPatternMatcherTest {
 
     @Test
     fun testMatches() {
-        val matcher = PathPatternMatcher("/users/{id}")
+        val matcher = PathPatternMatcher("/users/:id")
         assertEquals(true, matcher.matches("/users/123"))
         assertEquals(false, matcher.matches("/posts/123"))
     }
 
     @Test
     fun testTypeSafeParameterAccess() {
-        val matcher = PathPatternMatcher("/users/{id}/age/{age}")
+        val matcher = PathPatternMatcher("/users/:id/age/:age")
         val result = matcher.match("/users/123/age/25")
         assertNotNull(result)
         assertEquals(123, result.int("id"))

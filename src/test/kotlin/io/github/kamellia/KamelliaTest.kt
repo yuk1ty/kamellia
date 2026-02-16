@@ -59,8 +59,8 @@ class KamelliaTest {
                 .get("/") { Response.ok("home") }
                 .get("/users") { Response.ok("users") }
                 .post("/users") { Response.ok("create") }
-                .put("/users/{id}") { Response.ok("update") }
-                .delete("/users/{id}") { Response.ok("delete") }
+                .put("/users/:id") { Response.ok("update") }
+                .delete("/users/:id") { Response.ok("delete") }
 
         assertNotNull(app)
     }

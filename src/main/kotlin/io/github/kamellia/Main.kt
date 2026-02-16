@@ -25,13 +25,13 @@ suspend fun main() {
     }
 
     // Path parameters
-    app.get("/users/{id}") { request ->
+    app.get("/users/:id") { request ->
         val userId = request.pathParams.string("id")
         Response.json(User(id = userId ?: "unknown", name = "John Doe"))
     }
 
     // Multiple path parameters
-    app.get("/users/{userId}/posts/{postId}") { request ->
+    app.get("/users/:userId/posts/:postId") { request ->
         Response.json(
             PostResponse(
                 userId = request.pathParams.string("userId"),

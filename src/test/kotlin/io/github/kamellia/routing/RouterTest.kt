@@ -43,7 +43,7 @@ class RouterTest {
     @Test
     fun testMatchWithPathParams() = runTest {
         val router = Router()
-        router.addRoute(HttpMethod.GET, "/users/{id}") { Response.ok("user") }
+        router.addRoute(HttpMethod.GET, "/users/:id") { Response.ok("user") }
 
         val request =
             Request(
@@ -148,8 +148,8 @@ class RouterTest {
     @Test
     fun testFirstMatchWins() = runTest {
         val router = Router()
-        router.addRoute(HttpMethod.GET, "/users/{id}") { Response.ok("specific") }
-        router.addRoute(HttpMethod.GET, "/users/{name}") { Response.ok("general") }
+        router.addRoute(HttpMethod.GET, "/users/:id") { Response.ok("specific") }
+        router.addRoute(HttpMethod.GET, "/users/:name") { Response.ok("general") }
 
         val request =
             Request(

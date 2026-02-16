@@ -82,7 +82,7 @@ app.get("/") { req ->
     Response.ok("Hello, Kamellia!")
 }
 
-app.get("/users/{id}") { req ->
+app.get("/users/:id") { req ->
     val userId = req.pathParams.int("id")
         ?: return@get Response.badRequest("Invalid user ID")
     Response.json(mapOf("userId" to userId))
@@ -165,7 +165,7 @@ data class RouteMatch(
 )
 
 class PathPatternMatcher(private val pattern: String) : RouteMatcher {
-    // "/users/{id}/posts/{postId}" のようなパターンをパース
+    // "/users/:id/posts/:postId" のようなパターンをパース
     // 正規表現で PathParams を返す
     fun match(path: String): PathParams?
 }
@@ -265,14 +265,14 @@ data class Request(
 
 ```kotlin
 // パスパラメータの取得（型名で明示的）
-app.get("/users/{id}") { req ->
+app.get("/users/:id") { req ->
     val userId = req.pathParams.int("id")
         ?: return@get Response.badRequest("Invalid user ID")
     Response.json(getUser(userId))
 }
 
 // inline reified 版（型推論が効く）
-app.get("/posts/{postId}") { req ->
+app.get("/posts/:postId") { req ->
     val postId: Long = req.pathParams.get("postId")
         ?: return@get Response.badRequest("Invalid post ID")
     Response.json(getPost(postId))
@@ -296,7 +296,7 @@ app.get("/filter") { req ->
 }
 
 // より複雑な例
-app.get("/articles/{articleId}/comments/{commentId}") { req ->
+app.get("/articles/:articleId/comments/:commentId") { req ->
     val articleId: Long = req.pathParams.get("articleId")
         ?: return@get Response.badRequest("Invalid article ID")
     val commentId: Int = req.pathParams.get("commentId")

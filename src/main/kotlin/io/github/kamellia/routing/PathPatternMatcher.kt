@@ -7,18 +7,17 @@ class PathPatternMatcher(pattern: String) {
     private val regex: Regex
 
     init {
-        // Extract parameter names from pattern like "/users/{id}"
-        val paramPattern = """\{(\w+)\}""".toRegex()
+        // Extract parameter names from pattern like "/users/:id"
+        val paramPattern = """:(\w+)""".toRegex()
         paramPattern.findAll(pattern).forEach { match ->
             paramNames.add(match.groupValues[1])
         }
 
-        // Convert "/users/{id}/posts/{postId}" to regex with named groups
+        // Convert "/users/:id/posts/:postId" to regex with named groups
         // Result: "^/users/(?<id>[^/]+)/posts/(?<postId>[^/]+)$"
-        val regexPattern =
-            pattern
-                .replace("{", "(?<")
-                .replace("}", ">[^/]+)")
+        val regexPattern = paramPattern.replace(pattern) { matchResult ->
+            "(?<${matchResult.groupValues[1]}>[^/]+)"
+        }
 
         regex = Regex("^$regexPattern\$")
     }
