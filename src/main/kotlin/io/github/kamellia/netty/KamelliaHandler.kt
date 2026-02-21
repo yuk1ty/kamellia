@@ -4,6 +4,8 @@ import io.github.kamellia.core.Body
 import io.github.kamellia.core.Request
 import io.github.kamellia.core.Response
 import io.github.kamellia.error.HttpException
+import io.github.kamellia.middleware.Middleware
+import io.github.kamellia.middleware.composeMiddlewares
 import io.github.kamellia.routing.Router
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
@@ -19,6 +21,7 @@ import kotlin.coroutines.CoroutineContext
 
 class KamelliaHandler(
     private val router: Router,
+    private val middlewares: List<Middleware> = emptyList(),
     private val errorHandler: (Throwable, Request?) -> Response = defaultErrorHandler,
 ) : SimpleChannelInboundHandler<FullHttpRequest>(false) {
     companion object {
@@ -55,19 +58,28 @@ class KamelliaHandler(
                 // Find matching route
                 val routeMatch = router.match(request)
 
-                val response =
+                // Compose middlewares with handler
+                val handler =
                     if (routeMatch != null) {
-                        // Add path params to request
-                        val requestWithParams =
-                            request.copy(
-                                pathParams = routeMatch.pathParams,
-                            )
-
-                        // Execute handler
-                        routeMatch.handler(requestWithParams)
+                        // Compose middlewares with route handler
+                        composeMiddlewares(middlewares, routeMatch.handler)
                     } else {
-                        Response.notFound("Route not found: ${request.method} ${request.path}")
+                        // Compose middlewares with 404 handler
+                        composeMiddlewares(middlewares) { _: Request ->
+                            Response.notFound("Route not found: ${request.method} ${request.path}")
+                        }
                     }
+
+                // Prepare request with path params
+                val requestWithParams =
+                    if (routeMatch != null) {
+                        request.copy(pathParams = routeMatch.pathParams)
+                    } else {
+                        request
+                    }
+
+                // Execute composed handler
+                val response = handler(requestWithParams)
 
                 // Convert and send response
                 sendResponse(ctx, response)

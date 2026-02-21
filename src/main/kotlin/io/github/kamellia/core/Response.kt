@@ -56,5 +56,21 @@ data class Response(
                 body = Body.Text(message),
             )
         }
+
+        fun unauthorized(message: String = "Unauthorized"): Response {
+            return Response(
+                status = HttpStatus.UNAUTHORIZED,
+                headers = mapOf("Content-Type" to "text/plain; charset=utf-8"),
+                body = Body.Text(message),
+            )
+        }
+
+        fun forbidden(message: String = "Forbidden"): Response {
+            return Response(
+                status = HttpStatus.FORBIDDEN,
+                headers = mapOf("Content-Type" to "text/plain; charset=utf-8"),
+                body = Body.Text(message),
+            )
+        }
     }
 }

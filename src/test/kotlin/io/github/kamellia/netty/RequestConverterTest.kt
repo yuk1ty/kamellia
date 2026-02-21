@@ -49,7 +49,7 @@ class RequestConverterTest {
         assertEquals(HttpMethod.POST, request.method)
         assertEquals("/users", request.path)
         assertTrue(request.body is Body.Text)
-        assertEquals(content, (request.body as Body.Text).content)
+        assertEquals(content, (request.body).content)
     }
 
     @Test
@@ -83,7 +83,7 @@ class RequestConverterTest {
         val request = RequestConverter.convert(nettyRequest)
 
         assertTrue(request.body is Body.Binary)
-        val binaryBody = request.body as Body.Binary
+        val binaryBody = request.body
         assertEquals(4, binaryBody.bytes.size)
         assertEquals(0x01.toByte(), binaryBody.bytes[0])
     }

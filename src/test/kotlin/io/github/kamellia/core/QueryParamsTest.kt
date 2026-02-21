@@ -36,7 +36,9 @@ class QueryParamsTest {
 
     @Test
     fun testBooleanConversion() {
-        val params = QueryParams.of(mapOf("flag1" to listOf("true"), "flag2" to listOf("false"), "invalid" to listOf("yes")))
+        val params = QueryParams.of(
+            mapOf("flag1" to listOf("true"), "flag2" to listOf("false"), "invalid" to listOf("yes")),
+        )
 
         assertEquals(true, params.boolean("flag1"))
         assertEquals(false, params.boolean("flag2"))

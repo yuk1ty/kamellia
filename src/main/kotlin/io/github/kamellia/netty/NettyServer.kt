@@ -1,5 +1,6 @@
 package io.github.kamellia.netty
 
+import io.github.kamellia.middleware.Middleware
 import io.github.kamellia.routing.Router
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelInitializer
@@ -15,6 +16,7 @@ import io.netty.handler.logging.LoggingHandler
 class NettyServer(
     private val router: Router,
     private val port: Int,
+    private val middlewares: List<Middleware> = emptyList(),
 ) {
     private val bossGroup = NioEventLoopGroup(1)
     private val workerGroup = NioEventLoopGroup()
@@ -39,7 +41,7 @@ class NettyServer(
                             pipeline.addLast(HttpObjectAggregator(1024 * 1024))
 
                             // Kamellia handler
-                            pipeline.addLast(KamelliaHandler(router))
+                            pipeline.addLast(KamelliaHandler(router, middlewares))
                         }
                     },
                 ).childOption(ChannelOption.SO_KEEPALIVE, true)
