@@ -14,6 +14,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+class TestException(message: String) : Exception(message)
+
 class MiddlewareIntegrationTest {
     @Test
     fun testMiddlewareWithRouting() = runTest {
@@ -198,7 +200,7 @@ class MiddlewareIntegrationTest {
         }
 
         val handler: Handler = {
-            throw RuntimeException("Test error")
+            throw TestException("Test error")
         }
 
         val composed = composeMiddlewares(listOf(errorHandlingMiddleware), handler)

@@ -57,6 +57,8 @@ spotless {
                     "indent_size" to "4",
                     "max_line_length" to "120",
                     "ktlint_standard_no-wildcard-imports" to "disabled",
+                    "ktlint_standard_wrapping" to "enabled",
+                    "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
                 ),
             )
         trimTrailingWhitespace()

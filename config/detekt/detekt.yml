@@ -136,24 +136,9 @@ exceptions:
   ThrowingNewInstanceOfSameException:
     active: true
   TooGenericExceptionCaught:
-    active: true
-    exceptionNames:
-      - 'ArrayIndexOutOfBoundsException'
-      - 'Error'
-      - 'Exception'
-      - 'IllegalMonitorStateException'
-      - 'IndexOutOfBoundsException'
-      - 'NullPointerException'
-      - 'RuntimeException'
-      - 'Throwable'
-    allowedExceptionNameRegex: '_|(ignore|expected).*'
+    active: false
   TooGenericExceptionThrown:
-    active: true
-    exceptionNames:
-      - 'Error'
-      - 'Exception'
-      - 'RuntimeException'
-      - 'Throwable'
+    active: false
 
 naming:
   active: true
@@ -291,6 +276,11 @@ potential-bugs:
   WrongEqualsTypeParameter:
     active: true
 
+formatting:
+  active: true
+  Wrapping:
+    active: false
+
 style:
   active: true
   AlsoCouldBeApply:
@@ -355,13 +345,13 @@ style:
       - '1'
       - '2'
     ignoreHashCodeFunction: true
-    ignorePropertyDeclaration: false
+    ignorePropertyDeclaration: true
     ignoreLocalVariableDeclaration: false
     ignoreConstantDeclaration: true
     ignoreCompanionObjectPropertyDeclaration: true
     ignoreAnnotation: false
     ignoreNamedArgument: true
-    ignoreEnums: false
+    ignoreEnums: true
     ignoreRanges: false
     ignoreExtensionFunctions: true
   MandatoryBracesIfStatements:

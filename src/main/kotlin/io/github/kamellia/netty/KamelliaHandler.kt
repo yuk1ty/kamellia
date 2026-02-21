@@ -78,15 +78,16 @@ class KamelliaHandler(
                         request
                     }
 
-                // Execute composed handler
-                val response = handler(requestWithParams)
+                // Execute composed handler and handle errors
+                val response =
+                    try {
+                        handler(requestWithParams)
+                    } catch (e: Exception) {
+                        errorHandler(e, request)
+                    }
 
                 // Convert and send response
                 sendResponse(ctx, response)
-            } catch (e: Exception) {
-                // Handle errors
-                val errorResponse = errorHandler(e, request)
-                sendResponse(ctx, errorResponse)
             } finally {
                 // Release message
                 ReferenceCountUtil.release(msg)

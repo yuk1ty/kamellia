@@ -16,6 +16,9 @@ import io.netty.handler.logging.LoggingHandler
 
 private val logger = KotlinLogging.logger {}
 
+private const val SO_BACKLOG_SIZE = 128
+private const val MAX_CONTENT_LENGTH = 1024 * 1024 // 1MB
+
 class NettyServer(
     private val router: Router,
     private val port: Int,
@@ -24,6 +27,7 @@ class NettyServer(
     private val bossGroup = NioEventLoopGroup(1)
     private val workerGroup = NioEventLoopGroup()
 
+    @Suppress("TooGenericExceptionCaught")
     fun start() {
         logger.info { "Initializing Netty server on port $port" }
 
@@ -32,7 +36,7 @@ class NettyServer(
             bootstrap
                 .group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel::class.java)
-                .option(ChannelOption.SO_BACKLOG, 128)
+                .option(ChannelOption.SO_BACKLOG, SO_BACKLOG_SIZE)
                 .handler(LoggingHandler(LogLevel.INFO))
                 .childHandler(
                     object : ChannelInitializer<SocketChannel>() {
@@ -43,7 +47,7 @@ class NettyServer(
                             pipeline.addLast(HttpServerCodec())
 
                             // Aggregate HTTP messages (max 1MB for Phase 1)
-                            pipeline.addLast(HttpObjectAggregator(1024 * 1024))
+                            pipeline.addLast(HttpObjectAggregator(MAX_CONTENT_LENGTH))
 
                             // Kamellia handler
                             pipeline.addLast(KamelliaHandler(router, middlewares))

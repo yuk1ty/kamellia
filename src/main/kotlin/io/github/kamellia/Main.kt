@@ -7,6 +7,8 @@ import kotlinx.serialization.Serializable
 
 private val logger = KotlinLogging.logger {}
 
+private const val DEFAULT_PORT = 3000
+
 @Serializable
 data class User(val id: String, val name: String)
 
@@ -63,6 +65,6 @@ suspend fun main() {
         Response.json(result)
     }
 
-    logger.info { "Starting Kamellia server on port 3000..." }
-    app.start(3000)
+    logger.info { "Starting Kamellia server on port $DEFAULT_PORT..." }
+    app.start(DEFAULT_PORT)
 }
