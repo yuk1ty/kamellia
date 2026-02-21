@@ -2,7 +2,10 @@ package io.github.kamellia
 
 import io.github.kamellia.core.Response
 import io.github.kamellia.core.text
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.Serializable
+
+private val logger = KotlinLogging.logger {}
 
 @Serializable
 data class User(val id: String, val name: String)
@@ -44,7 +47,7 @@ suspend fun main() {
     // POST endpoint
     app.post("/users") { request ->
         val body = request.text()
-        println("Received: $body")
+        logger.debug { "Received: $body" }
         Response.json(
             CreateUserResponse(
                 status = "created",
@@ -60,6 +63,6 @@ suspend fun main() {
         Response.json(result)
     }
 
-    println("Starting Kamellia server on port 3000...")
+    logger.info { "Starting Kamellia server on port 3000..." }
     app.start(3000)
 }

@@ -1,7 +1,13 @@
 package io.github.kamellia.middleware
 
 import io.github.kamellia.core.Response
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.oshai.kotlinlogging.withLoggingContext
+import java.util.UUID
 import kotlin.system.measureTimeMillis
+import kotlin.time.measureTimedValue
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Configuration for logging middleware
@@ -33,21 +39,24 @@ data class LoggingConfig(
  */
 fun loggingMiddleware(config: LoggingConfig = LoggingConfig()): Middleware = { next ->
     { req ->
-        var response: Response? = null
-        val duration =
-            measureTimeMillis {
-                println("[${req.method}] ${req.path}")
+        val requestId = UUID.randomUUID().toString().substring(0, 8)
+
+        val (response, duration) =
+            withLoggingContext("requestId" to requestId) {
+                logger.info { "[${req.method}] ${req.path}" }
                 if (config.logRequestBody) {
-                    println("Request Body: ${req.body}")
+                    logger.debug { "Request Body: ${req.body}" }
                 }
-                response = next(req)
+                measureTimedValue { next(req) }
             }
 
-        println("Response: ${response!!.status.code} ${response!!.status} (${duration}ms)")
-        if (config.logResponseBody) {
-            println("Response Body: ${response!!.body}")
+        withLoggingContext("requestId" to requestId) {
+            logger.info { "Response: ${response.status.code} ${response.status} (${duration.inWholeMilliseconds}ms)" }
+            if (config.logResponseBody) {
+                logger.debug { "Response Body: ${response.body}" }
+            }
         }
 
-        response!!
+        response
     }
 }
