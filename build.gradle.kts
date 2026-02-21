@@ -40,17 +40,45 @@ kotlin {
 }
 
 application {
-    mainClass.set("io.github.kamellia.MainKt")
+    mainClass.set("examples.BasicServerKt")
 }
 
 tasks.test {
     useJUnitPlatform()
 }
 
+// Examples source set configuration
+sourceSets {
+    create("examples") {
+        java {
+            srcDir("examples")
+        }
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
+    }
+}
+
+configurations {
+    named("examplesImplementation") {
+        extendsFrom(configurations.implementation.get())
+    }
+}
+
+// Task to run examples
+tasks.register<JavaExec>("runExample") {
+    group = "examples"
+    description = "Run an example (use -PexampleMain=BasicServerKt)"
+    classpath = sourceSets["examples"].runtimeClasspath
+    val exampleMain = project.findProperty("exampleMain") as String? ?: ""
+    if (exampleMain.isNotEmpty()) {
+        mainClass.set("examples.$exampleMain")
+    }
+}
+
 // Spotless configuration
 spotless {
     kotlin {
-        target("src/**/*.kt")
+        target("src/**/*.kt", "examples/**/*.kt")
         ktlint("1.2.1")
             .editorConfigOverride(
                 mapOf(

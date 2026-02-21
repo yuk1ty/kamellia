@@ -1,5 +1,6 @@
-package io.github.kamellia
+package examples
 
+import io.github.kamellia.Kamellia
 import io.github.kamellia.core.Response
 import io.github.kamellia.core.text
 import io.github.oshai.kotlinlogging.KotlinLogging
