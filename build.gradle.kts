@@ -1,6 +1,8 @@
 plugins {
     kotlin("jvm") version "2.2.21"
     kotlin("plugin.serialization") version "2.2.21"
+    kotlin("plugin.allopen") version "2.2.21"
+    id("org.jetbrains.kotlinx.benchmark") version "0.4.16"
     id("com.diffplug.spotless") version "6.25.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.6"
     application
@@ -33,6 +35,9 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.6")
+
+    // Benchmarking
+    implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:0.4.16")
 }
 
 kotlin {
@@ -41,6 +46,11 @@ kotlin {
 
 application {
     mainClass.set("examples.BasicServerKt")
+}
+
+// allopen configuration for JMH compatibility
+allOpen {
+    annotation("org.openjdk.jmh.annotations.State")
 }
 
 tasks.test {
@@ -56,10 +66,21 @@ sourceSets {
         compileClasspath += sourceSets.main.get().output
         runtimeClasspath += sourceSets.main.get().output
     }
+
+    create("benchmark") {
+        java {
+            srcDir("src/benchmark/kotlin")
+        }
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
+    }
 }
 
 configurations {
     named("examplesImplementation") {
+        extendsFrom(configurations.implementation.get())
+    }
+    named("benchmarkImplementation") {
         extendsFrom(configurations.implementation.get())
     }
 }
@@ -75,10 +96,37 @@ tasks.register<JavaExec>("runExample") {
     }
 }
 
+// kotlinx-benchmark configuration
+benchmark {
+    targets {
+        register("benchmark")
+    }
+
+    configurations {
+        named("main") {
+            warmups = 10
+            iterations = 10
+            iterationTime = 1
+            iterationTimeUnit = "s"
+            outputTimeUnit = "ms"
+            mode = "thrpt"
+        }
+
+        register("smoke") {
+            warmups = 3
+            iterations = 5
+            iterationTime = 500
+            iterationTimeUnit = "ms"
+            outputTimeUnit = "ms"
+            mode = "thrpt"
+        }
+    }
+}
+
 // Spotless configuration
 spotless {
     kotlin {
-        target("src/**/*.kt", "examples/**/*.kt")
+        target("src/**/*.kt", "examples/**/*.kt", "src/benchmark/**/*.kt")
         ktlint("1.2.1")
             .editorConfigOverride(
                 mapOf(
@@ -104,6 +152,12 @@ detekt {
     allRules = false
     config.setFrom("$projectDir/config/detekt/detekt.yml")
     baseline = file("$projectDir/config/detekt/baseline.xml")
+    source.setFrom(
+        "src/main/kotlin",
+        "src/test/kotlin",
+        "examples",
+        "src/benchmark/kotlin",
+    )
 }
 
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
