@@ -312,13 +312,10 @@ style:
     active: false
   ForbiddenComment:
     active: true
-    comments:
-      - reason: 'Forbidden FIXME comment'
-        value: 'FIXME:'
-      - reason: 'Forbidden STOPSHIP comment'
-        value: 'STOPSHIP:'
-      - reason: 'Forbidden TODO comment'
-        value: 'TODO:'
+    values:
+      - 'FIXME:'
+      - 'STOPSHIP:'
+      - 'TODO:'
     allowedPatterns: ''
   ForbiddenImport:
     active: false
@@ -357,7 +354,7 @@ style:
     ignoreEnums: true
     ignoreRanges: false
     ignoreExtensionFunctions: true
-  BracesOnIfStatements:
+  MandatoryBracesIfStatements:
     active: false
   MandatoryBracesLoops:
     active: false
