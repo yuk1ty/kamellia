@@ -312,13 +312,10 @@ style:
     active: false
   ForbiddenComment:
     active: true
-    comments:
-      - reason: 'Forbidden FIXME todo marker in comment, please fix the problem.'
-        value: 'FIXME:'
-      - reason: 'Forbidden STOPSHIP todo marker in comment, please address the issue before shipping the code.'
-        value: 'STOPSHIP:'
-      - reason: 'Forbidden TODO todo marker in comment, please do the changes.'
-        value: 'TODO:'
+    values:
+      - 'FIXME:'
+      - 'STOPSHIP:'
+      - 'TODO:'
     allowedPatterns: ''
   ForbiddenImport:
     active: false
@@ -357,9 +354,9 @@ style:
     ignoreEnums: true
     ignoreRanges: false
     ignoreExtensionFunctions: true
-  BracesOnIfStatements:
+  MandatoryBracesIfStatements:
     active: false
-  BracesOnWhenStatements:
+  MandatoryBracesLoops:
     active: false
   MaxChainedCallsOnSameLine:
     active: false
