@@ -24,3 +24,10 @@ inline fun <reified V, reified E> Result<V, E>.asJsonIntoResponse(
         }
     return ResultIntoResponse(mapped)
 }
+
+inline fun <reified V : IntoResponse, reified E : IntoResponse> Result<V, E>.asIntoResponse(): IntoResponse =
+    ResultIntoResponse(this)
+
+data object Unit : IntoResponse {
+    override fun intoResponse(): Response = Response(status = HttpStatus.NO_CONTENT)
+}
