@@ -14,7 +14,7 @@ class RequestTest {
                 headers = emptyMap(),
                 queryParams = QueryParams.empty(),
                 pathParams = PathParams.empty(),
-                body = Body.Text("Hello, World!"),
+                body = Body.Strict("Hello, World!".toByteArray()),
                 context = Context(),
             )
 
@@ -30,7 +30,7 @@ class RequestTest {
                 headers = emptyMap(),
                 queryParams = QueryParams.empty(),
                 pathParams = PathParams.empty(),
-                body = Body.Binary("Hello".toByteArray()),
+                body = Body.Strict("Hello".toByteArray()),
                 context = Context(),
             )
 
@@ -62,7 +62,7 @@ class RequestTest {
                 headers = mapOf("Content-Type" to "application/json"),
                 queryParams = QueryParams.of(mapOf("filter" to listOf("active"))),
                 pathParams = PathParams.of(mapOf("id" to "123")),
-                body = Body.Text("{}"),
+                body = Body.Strict("{}".toByteArray()),
                 context = Context(),
             )
 
