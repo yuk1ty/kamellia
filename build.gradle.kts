@@ -15,8 +15,6 @@ allprojects {
 }
 
 subprojects {
-    if (name == "kamellia-legacy") return@subprojects
-
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "com.diffplug.spotless")
     apply(plugin = "io.gitlab.arturbosch.detekt")
