@@ -11,6 +11,6 @@ enum class HttpMethod {
     ;
 
     companion object {
-        fun fromString(method: String): HttpMethod = valueOf(method.uppercase())
+        fun fromString(method: String): HttpMethod = enumValueOf(method.uppercase())
     }
 }
