@@ -66,6 +66,34 @@ class RouterTest {
     }
 
     @Test
+    fun `should return RouteMatch with empty PathParams for a static route`() = runTest {
+        val router = Router()
+        router.addRoute(HttpMethod.GET, "/users") { Response(HttpStatus.OK) }
+
+        val match = router.match(req(HttpMethod.GET, "/users"))
+        assertNotNull(match)
+        assertEquals(PathParams.empty(), match.pathParams)
+    }
+
+    @Test
+    fun `should dispatch each method and path independently when multiple routes are registered`() = runTest {
+        val router = Router()
+        router.addRoute(HttpMethod.GET, "/users") {
+            Response(HttpStatus.OK, body = Body.Strict("users".toByteArray()))
+        }
+        router.addRoute(HttpMethod.GET, "/posts") {
+            Response(HttpStatus.OK, body = Body.Strict("posts".toByteArray()))
+        }
+        router.addRoute(HttpMethod.POST, "/users") {
+            Response(HttpStatus.OK, body = Body.Strict("create user".toByteArray()))
+        }
+
+        assertNotNull(router.match(req(HttpMethod.GET, "/users")))
+        assertNotNull(router.match(req(HttpMethod.GET, "/posts")))
+        assertNotNull(router.match(req(HttpMethod.POST, "/users")))
+    }
+
+    @Test
     fun `should pick the first registered route when multiple patterns match`() = runTest {
         val router = Router()
         router.addRoute(HttpMethod.GET, "/users/:id") {

@@ -37,4 +37,51 @@ class ResponseConverterTest {
         assertEquals(0, nettyResponse.content().readableBytes())
         assertEquals("0", nettyResponse.headers().get(HttpHeaderNames.CONTENT_LENGTH))
     }
+
+    @Test
+    fun `should set Content-Length header to the body byte size`() {
+        val response = Response(
+            status = HttpStatus.OK,
+            body = Body.Strict("Test".toByteArray()),
+        )
+
+        val nettyResponse = ResponseConverter.convertFull(response)
+
+        assertEquals(true, nettyResponse.headers().contains(HttpHeaderNames.CONTENT_LENGTH))
+        assertEquals(4, nettyResponse.headers().getInt(HttpHeaderNames.CONTENT_LENGTH))
+    }
+
+    @Test
+    fun `should propagate multiple response headers to the Netty response`() {
+        val response = Response(
+            status = HttpStatus.OK,
+            headers = mapOf(
+                "Content-Type" to "application/json",
+                "X-Custom-Header" to "custom-value",
+            ),
+            body = Body.Strict("{}".toByteArray()),
+        )
+
+        val nettyResponse = ResponseConverter.convertFull(response)
+
+        assertEquals("application/json", nettyResponse.headers().get("Content-Type"))
+        assertEquals("custom-value", nettyResponse.headers().get("X-Custom-Header"))
+    }
+
+    @Test
+    fun `should map HttpStatus to the matching Netty status code`() {
+        val testCases = listOf(
+            HttpStatus.OK to 200,
+            HttpStatus.CREATED to 201,
+            HttpStatus.BAD_REQUEST to 400,
+            HttpStatus.NOT_FOUND to 404,
+            HttpStatus.INTERNAL_SERVER_ERROR to 500,
+        )
+
+        testCases.forEach { (status, expectedCode) ->
+            val response = Response(status = status)
+            val nettyResponse = ResponseConverter.convertFull(response)
+            assertEquals(expectedCode, nettyResponse.status().code())
+        }
+    }
 }
