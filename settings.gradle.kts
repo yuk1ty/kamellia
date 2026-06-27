@@ -5,14 +5,14 @@ plugins {
 rootProject.name = "kamellia"
 
 include(
-    "kamellia-core",
-    "kamellia-router",
-    "kamellia-middleware",
-    "kamellia-netty",
-    "kamellia-app",
-    "kamellia-kotlinx-serialization",
-    "kamellia-kotlin-result",
-    "kamellia-arrow-kt",
+    "core",
+    "arrow-kt",
+    "kotlin-result",
+    "kotlinx-serialization",
     "examples",
     "benchmarks",
 )
+
+project(":arrow-kt").projectDir = file("libs/arrow-kt")
+project(":kotlin-result").projectDir = file("libs/kotlin-result")
+project(":kotlinx-serialization").projectDir = file("libs/kotlinx-serialization")
