@@ -8,21 +8,17 @@ Kamellia is a modern, type-safe HTTP server library for Kotlin built on top of N
 Handler = Request -> Response
 ```
 
-The architecture is intentionally modular, with clear separation of concerns across independent Gradle modules that can be composed as needed.
+The architecture is intentionally modular, with clear separation of concerns across a single `core` Gradle project that uses Kotlin packages to organize routing, middleware, Netty integration, and the application facade. Optional integration libraries live as separate Gradle projects under the `libs` directory.
 
 ## Module Structure
 
 The project is organized into the following modules, ordered from lowest to highest level of abstraction:
 
 ```
-kamellia-core              (foundational types: Request, Response, Body, etc.)
-kamellia-router            (request routing and path matching)
-kamellia-middleware        (composable middleware system)
-kamellia-netty             (Netty server integration and protocol adapters)
-kamellia-kotlinx-serialization (JSON request/response helpers)
-kamellia-kotlin-result     (integration with kotlin-result library)
-kamellia-arrow-kt          (integration with Arrow Kt Either)
-kamellia-app               (convenience facade composing all core modules)
+core                       (foundational types, routing, middleware, Netty integration, and app facade)
+libs/kotlinx-serialization (JSON request/response helpers)
+libs/kotlin-result         (integration with kotlin-result library)
+libs/arrow-kt              (integration with Arrow Kt Either)
 examples                   (usage examples)
 benchmarks                 (performance benchmarks)
 ```
@@ -30,23 +26,15 @@ benchmarks                 (performance benchmarks)
 ### Module Dependencies
 
 ```
-kamellia-core
-    │
-    ├── kamellia-router
-    │       │
-    ├── kamellia-middleware ─┤
-    │       │                │
-    │       └── kamellia-netty
-    │              │
-    │              └── kamellia-app (composes core, router, middleware, netty)
-    │
-    ├── kamellia-kotlinx-serialization
-    │       │
-    │       ├── kamellia-kotlin-result
-    │       └── kamellia-arrow-kt
+core
+    ▲
+    └── libs/kotlinx-serialization
+            ▲
+            ├── libs/kotlin-result
+            └── libs/arrow-kt
 ```
 
-`kamellia-app` is the **aggregator module** that pulls together `kamellia-core`, `kamellia-router`, `kamellia-middleware`, and `kamellia-netty` to provide a single, easy-to-use entry point (`Kamellia` class) for building applications.
+The `core` project contains the `Kamellia` facade and uses Kotlin packages (`io.github.kamellia.core`, `io.github.kamellia.routing`, `io.github.kamellia.middleware`, `io.github.kamellia.netty`, `io.github.kamellia.dsl`) to provide a single, easy-to-use entry point for building applications.
 
 ## Core Concepts
 
@@ -98,7 +86,7 @@ This design allows handlers to work with both simple and streaming content witho
 
 ### 4. Router
 
-The router (`kamellia-router`) is a straightforward linear matcher:
+The router (`io.github.kamellia.routing`) is a straightforward linear matcher:
 
 - Stores routes as an ordered list of `Route(method, pattern, handler, matcher)`
 - `PathPatternMatcher` compiles `:param` segments into named regex capture groups
@@ -140,7 +128,7 @@ Built-in middlewares include:
 
 ### 6. Netty Integration
 
-The `kamellia-netty` module bridges Kamellia's core model with Netty's channel pipeline:
+The Netty integration package (`io.github.kamellia.netty`) bridges Kamellia's core model with Netty's channel pipeline:
 
 **`NettyServer`** — Bootstraps a Netty `ServerBootstrap` with:
 - `NioEventLoopGroup(1)` for the boss (acceptor) thread
@@ -165,7 +153,7 @@ The `kamellia-netty` module bridges Kamellia's core model with Netty's channel p
 
 ### 7. Serialization Integration
 
-`kamellia-kotlinx-serialization` provides type-safe JSON request/response helpers built on `kotlinx.serialization`:
+`kotlinx-serialization` provides type-safe JSON request/response helpers built on `kotlinx.serialization`:
 
 - **`json(value)`** — encodes a `@Serializable` value into a `JsonResponse` (an `IntoResponse`)
 - **`Request.json<T>()`** — decodes the request body into a `@Serializable` type, with strict Content-Type validation
@@ -173,7 +161,7 @@ The `kamellia-netty` module bridges Kamellia's core model with Netty's channel p
 
 ### 8. Functional Error Handling Integrations
 
-#### kotlin-result (`kamellia-kotlin-result`)
+#### kotlin-result (`libs/kotlin-result`)
 
 Provides `IntoResponse` wrappers for `Result<V, E>` from the `kotlin-result` library:
 
@@ -182,15 +170,15 @@ Provides `IntoResponse` wrappers for `Result<V, E>` from the `kotlin-result` lib
 - `Result.asIntoResponse()` — for when both sides already implement `IntoResponse`
 - `Unit` — a no-content `IntoResponse` singleton for `Result<Unit, E>` scenarios
 
-#### Arrow Kt (`kamellia-arrow-kt`)
+#### Arrow Kt (`libs/arrow-kt`)
 
 Provides `IntoResponse` wrapper for `Either<L, R>`:
 
 - `EitherIntoResponse` — folds `Left` / `Right` into their respective `IntoResponse` conversions
 
-## Application Facade (`kamellia-app`)
+## Application Facade (`core`)
 
-The `Kamellia` class in `kamellia-app` ties everything together:
+The `Kamellia` class in `core` ties everything together:
 
 ```kotlin
 class Kamellia {
@@ -267,7 +255,7 @@ Netty writeAndFlush → Client
 
 5. **Coroutine-First** — Handlers are `suspend` functions. Netty event loops are bridged to Kotlin coroutines via `Executor.asCoroutineDispatcher()`.
 
-6. **Modularity** — Each module has a single responsibility. You can use `kamellia-core` + `kamellia-router` with a custom server, or pull in the full stack via `kamellia-app`.
+6. **Modularity** — `core` provides the full HTTP stack as Kotlin packages, while optional integrations live as separate projects under `libs`. Pull in the full stack via `core`, or add `libs` extensions as needed.
 
 ## Future Directions
 

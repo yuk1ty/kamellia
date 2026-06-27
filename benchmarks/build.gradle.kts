@@ -4,10 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":kamellia-core"))
-    implementation(project(":kamellia-router"))
-    implementation(project(":kamellia-middleware"))
-    implementation(project(":kamellia-netty"))
+    implementation(project(":core"))
     implementation("io.netty:netty-all:4.1.108.Final")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:0.4.16")
